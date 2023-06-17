@@ -107,7 +107,7 @@ mkdir -p ${syst_dir}${srv_name}/increment/
 date
 echo "Finish backup ${srv_name}"
 ```
-![alt text](https://github.com/SergeiShulga/Replication_and_scaling/blob/main/img/001.png)
+![alt text](https://github.com/SergeiShulga/Backup/blob/main/img/003.png)
 
 Задание со звёздочкой*
 Это задание дополнительное. Его можно не выполнять. На зачёт это не повлияет. Вы можете его выполнить, если хотите глубже разобраться в материале.

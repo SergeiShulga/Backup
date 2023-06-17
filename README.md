@@ -1,5 +1,4 @@
-# Backup
-10.4 «Резервное копирование»- Сергей Шульга
+### 10.4 «Резервное копирование»- Сергей Шульга
 
 #### Задание 1
 В чём разница между:
@@ -8,7 +7,6 @@
 * дифференциальным резервным копированием,
 * инкрементным резервным копированием.
 Приведите ответ в свободной форме.
-
 
 #### Полное резервное копирование (Full Backup)
 Создается полная копия набора данных. С точки зрения скорости восстановления и уровня надежности считается наиболее выигрышным вариантом бэкапа. Однако у полного резервного копирования есть и минусы — full backup требует много времени для создания копии и создает существенную нагрузку на сеть.
@@ -50,6 +48,77 @@
 Пришлите:
 - конфигурационные файлы для bacula-dir, bacula-sd, bacula-fd,
 - скриншот, подтверждающий успешное прохождение резервного копирования.
+
+### bacula-sd
+```
+Storage {                             # definition of myself
+  Name = debian-sd
+  SDPort = 9103                  # Director's port
+  WorkingDirectory = "/var/lib/bacula"
+  Pid Directory = "/run/bacula"
+  Plugin Directory = "/usr/lib/bacula"
+  Maximum Concurrent Jobs = 20
+  SDAddress = 127.0.0.1
+}
+
+Director {
+  Name = debian-dir
+  Password = "8z3RrpNnb6Hp2Np-sjsZBZc4o0NvDnawP"
+}
+
+Director {
+  Name = debian-mon
+  Password = "7SZq6_RoaK-SHiiMvC6iEQLHcwFOJ8ywL"
+  Monitor = yes
+}
+
+Autochanger {
+  Name = FileChgr1
+  Device = FileChgr1-Dev1
+  Changer Command = ""
+  Changer Device = /dev/null
+}
+
+Device {
+  Name = FileChgr1-Dev1
+  Media Type = File1
+  Archive Device = ./bacula/restore
+  LabelMedia = yes;                   # lets Bacula label unlabeled media
+  Random Access = Yes;
+  AutomaticMount = yes;               # when device opened, read it
+  RemovableMedia = no;
+  AlwaysOpen = no;
+  Maximum Concurrent Jobs = 5
+}
+
+Messages {
+  Name = Standard
+  director = debian-dir = all
+}
+```
+### bacula-fd
+```
+Director {
+  Name = debian-dir
+  Password = "SoLEcBu7BMI7vIUpG1viKvnFbbT0gKqL-"
+}
+
+FileDaemon {                          # this is me
+  Name = debian-fd
+  FDport = 9102                  # where we listen for the director
+  WorkingDirectory = /var/lib/bacula
+  Pid Directory = /run/bacula
+  Maximum Concurrent Jobs = 20
+  Plugin Directory = /usr/lib/bacula
+  FDAddress = 127.0.0.1
+}
+Messages {
+  Name = Standard
+  director = debian-dir = all, !skipped, !restored
+}
+```
+![alt text](https://github.com/SergeiShulga/Backup/blob/main/img/002.png)
+
 
 #### Задание 3
 Установите программное обеспечении Rsync. Настройте синхронизацию на двух нодах. Протестируйте работу сервиса.

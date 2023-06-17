@@ -53,8 +53,61 @@
 
 #### Задание 3
 Установите программное обеспечении Rsync. Настройте синхронизацию на двух нодах. Протестируйте работу сервиса.
-
 Пришлите рабочую конфигурацию сервера и клиента Rsync блоком кода в вашем md-файле.
+
+### Клиент
+```
+pid file = /var/run/rsyncd.pid
+log file = /var/log/rsync.log
+transfer logging = true
+munge symlinks = yes
+
+[data]
+path = /root/
+uid = root
+read only = yes
+list = yes
+comment = Data backup Dir ][a][a][a
+auth users = backup
+secrets file = /etc/rsyncd.scrt
+
+[new]
+path = /etc/
+uid = root
+read only = yes
+list = yes
+comment = System fileset
+auth users = backup
+secrets file = /etc/rsyncd.scrt
+```
+### Сервер
+```
+#!/bin/bash
+date
+syst_dir=/backup/
+srv_name=debian10
+srv_ip=192.168.1.92
+srv_user=backup
+
+srv_dir=data
+echo "Start backup ${srv_name}"
+# Создаем папку для инкрементных бэкапов
+mkdir -p ${syst_dir}${srv_name}/increment/
+/usr/bin/rsync -avz --progress --delete --password-file=/etc/rsyncd.scrt ${srv_user}@${srv_ip}::${srv_dir} ${syst_dir}${srv_name}/current/ --backup --backup-dir=${syst_dir}${srv_name}/increment/`date +%Y-%m-%d`/
+/usr/bin/find ${syst_dir}${srv_name}/increment/ -maxdepth 1 -type d -mtime +30 -exec rm -rf {} \;
+date
+echo "Finish backup ${srv_name}"
+
+srv_dir=new
+echo "Start backup ${srv_name}"
+# Создаем папку для инкрементных бэкапов
+mkdir -p ${syst_dir}${srv_name}/increment/
+/usr/bin/rsync -avz --progress --delete --password-file=/etc/rsyncd.scrt ${srv_user}@${srv_ip}::${srv_dir} ${syst_dir}${srv_name}/current/ --backup --backup-dir=${syst_dir}${srv_name}/increment/`date +%Y-%m-%d`/
+/usr/bin/find ${syst_dir}${srv_name}/increment/ -maxdepth 1 -type d -mtime +30 -exec rm -rf {} \;
+date
+echo "Finish backup ${srv_name}"
+```
+![alt text](https://github.com/SergeiShulga/Replication_and_scaling/blob/main/img/001.png)
 
 Задание со звёздочкой*
 Это задание дополнительное. Его можно не выполнять. На зачёт это не повлияет. Вы можете его выполнить, если хотите глубже разобраться в материале.
